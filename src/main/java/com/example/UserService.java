@@ -1,31 +1,33 @@
-package main.java.com.example;
+package com.example;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.*;
 
 public class UserService {
 
-    // SECURITY ISSUE: Hardcoded credentials
-    private String password = "admin123";
+    private final Connection connection;
 
-    // VULNERABILITY: SQL Injection
-    public void findUser(String username) throws Exception {
-
-        Connection conn =
-            DriverManager.getConnection("jdbc:mysql://localhost/db",
-                    "root", password);
-
-        Statement st = conn.createStatement();
-
-        String query =
-            "SELECT * FROM users WHERE name = '" + username + "'";
-
-        st.executeQuery(query);
+    // inject connection (mockable)
+    public UserService(Connection connection) {
+        this.connection = connection;
     }
 
-    // SMELL: Unused method
-    public void notUsed() {
-        System.out.println("I am never called");
+    public boolean findUser(String username) throws SQLException {
+        String sql = "SELECT id FROM users WHERE name = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
     }
+
+    public int deleteUser(String username) throws SQLException {
+        String sql = "DELETE FROM users WHERE name = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            return ps.executeUpdate();
+        }
+    }
+
+    // remove dead method
 }
