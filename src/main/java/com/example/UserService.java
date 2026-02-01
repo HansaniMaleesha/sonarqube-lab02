@@ -1,44 +1,33 @@
 package com.example;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Logger;
+import java.sql.*;
 
 public class UserService {
 
-    // SECURITY ISSUE: Hardcoded credentials
-    private String password = "admin123";
+    private final Connection connection;
 
-    private static final Logger LOGGER = Logger.getLogger(UserService.class.getName());
+    // inject connection (mockable)
+    public UserService(Connection connection) {
+        this.connection = connection;
+    }
 
-    // VULNERABILITY: SQL Injection
-    public void findUser(String username) throws SQLException {
-
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/db", "root", password);
-             PreparedStatement ps = conn.prepareStatement("SELECT id, name FROM users WHERE name = ?")) {
-
+    public boolean findUser(String username) throws SQLException {
+        String sql = "SELECT id FROM users WHERE name = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
-                // process result set if needed
+                return rs.next();
             }
         }
     }
 
-    // SMELL: Unused method
-    public void notUsed() {
-        LOGGER.info("I am never called");
-    }
-
-    // EVEN WORSE: another SQL injection
-    public void deleteUser(String username) throws SQLException {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/db", "root", password);
-             PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE name = ?")) {
-
+    public int deleteUser(String username) throws SQLException {
+        String sql = "DELETE FROM users WHERE name = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
-            ps.executeUpdate();
+            return ps.executeUpdate();
         }
     }
+
+    // remove dead method
 }

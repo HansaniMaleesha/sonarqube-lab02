@@ -2,36 +2,46 @@ package com.example;
 
 public class Calculator {
 
-    // main calculate method
     public int calculate(int a, int b, String op) {
-        if(op.equals("add") || op.equals("add-again")) {
-            return a + b; // merged duplicated logic
-        } else if(op.equals("sub") || op.equals("sub-again")) {
-            return a - b; // merged duplicated logic
-        } else if(op.equals("mul")) {
-            return a * b;
-        } else if(op.equals("div")) {
-            if(b == 0) {
-                return 0;
-            } else {
+        switch (op) {
+            case "add":
+            case "add-again":
+                return add(a, b);
+
+            case "sub":
+            case "sub-again":
+                return a - b;
+
+            case "mul":
+                return a * b;
+
+            case "div":
+                if (b == 0) {
+                    throw new IllegalArgumentException("Division by zero");
+                }
                 return a / b;
-            }
-        } else if(op.equals("mod")) {
-            return a % b;
-        } else if(op.equals("pow")) {
-            int result = 1;
-            for(int i = 0; i < b; i++) {
-                result *= a;
-            }
-            return result;
-        } else {
-            return 0;
+
+            case "mod":
+                return a % b;
+
+            case "pow":
+                return power(a, b);
+
+            default:
+                throw new UnsupportedOperationException("Unknown operation: " + op);
         }
     }
 
-    // separated method, outside calculate()
-    public int addAgain(int a, int b) {
+    // now USED
+    private int add(int a, int b) {
         return a + b;
     }
 
+    private int power(int a, int b) {
+        int result = 1;
+        for (int i = 0; i < b; i++) {
+            result *= a;
+        }
+        return result;
+    }
 }
